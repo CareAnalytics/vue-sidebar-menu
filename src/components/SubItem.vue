@@ -31,9 +31,10 @@
       </router-link>
     </template>
     <template v-else>
+      <!-- The ':href' has been amended so that the default '#' link is only returned if the 'item.href' is 'undefined' -->
       <a
         class="vsm-link"
-        :href="item.href ? item.href : '#'"
+        :href="typeof item.href != 'undefined' ? item.href : '#'"
         :disabled="item.disabled"
         @click="clickEvent"
       >
@@ -68,10 +69,14 @@
           class="vsm-dropdown"
         >
           <div class="vsm-list">
+            <!-- 'formActiveStepData' has been added here so that its data can be passed through to the 'item' component. -->
+            <!-- 'v-show' has been added here so that a menu item can be hidden -->
             <item
               v-for="(subItem, index) in item.child"
               :key="index"
               :item="subItem"
+              :formActiveStepData="formActiveStepData"
+              v-show="typeof subItem.hidden != 'undefined' ? !subItem.hidden : true"
             />
           </div>
         </div>
@@ -93,6 +98,10 @@ export default {
     item: {
       type: Object,
       required: true
+    },
+    //This has been added so that the active form step of a multi-step form can be made available to this component. 
+    formActiveStepData:{
+	    type: Object
     }
   },
   beforeCreate () {
