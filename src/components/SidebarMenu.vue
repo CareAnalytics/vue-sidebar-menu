@@ -25,12 +25,16 @@
             </div>
           </template>
         </template>
+        <!-- 'formActiveStepData' has been added here so that its data can be passed through to the 'item' component. -->
+        <!-- 'v-show' has been added here so that menu item can be hidden -->
         <item
           v-else
           :key="index"
           :item="item"
           :first-item="true"
           :is-collapsed="isCollapsed"
+          :formActiveStepData="formActiveStepData"
+          v-show="typeof item.hidden != 'undefined' ? !item.hidden : true"
         />
       </template>
     </div>
@@ -60,10 +64,14 @@
             v-if="mobileItem && mobileItem.child"
             class="vsm-list"
           >
+            <!-- 'formActiveStepData' has been added here so that its data can be passed through to the 'sub-item' component. -->
+            <!-- 'v-show' has been added here so that sub menu steps can be hidden -->
             <sub-item
               v-for="(subItem, index) in mobileItem.child"
               :key="index"
               :item="subItem"
+              :formActiveStepData="formActiveStepData"
+              v-show="typeof subItem.hidden != 'undefined' ? !subItem.hidden : true"
             />
           </div>
         </transition>
@@ -122,6 +130,10 @@ export default {
     rtl: {
       type: Boolean,
       default: false
+    },
+    //This has been added so that the active form step of a multi-step form can be made available to this component. 
+    formActiveStepData:{
+	    type: Object
     }
   },
   data () {
