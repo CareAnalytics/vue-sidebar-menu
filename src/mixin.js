@@ -7,7 +7,8 @@ export const itemMixin = {
     }
   },
   created () {
-    this.active = this.item && this.item.href ? this.isLinkActive(this.item) : false
+    //This line has been amended so that 'item.href' does not need to be defined before the 'active' status is set.
+    this.active = this.item && typeof this.item.href != 'undefined' ? this.isLinkActive(this.item) : false
     this.childActive = this.item && this.item.child ? this.isChildActive(this.item.child) : false
     if (this.item && this.item.child) {
       if (this.showChild) {
@@ -22,7 +23,8 @@ export const itemMixin = {
 
     if (!this.$router) {
       window.addEventListener('hashchange', () => {
-        this.active = this.item && this.item.href ? this.isLinkActive(this.item) : false
+        //This line has been amended so that 'item.href' does not need to be defined before the 'active' status is set.
+        this.active = this.item && typeof this.item.href != 'undefined' ? this.isLinkActive(this.item) : false
         this.childActive = this.item && this.item.child ? this.isChildActive(this.item.child) : false
       })
     }
@@ -32,11 +34,16 @@ export const itemMixin = {
       this.itemShow = !this.itemShow
     },
     isLinkActive (item) {
+      //This has been added so that the 'title' of the active step in a multi-step form can be used to determine whether the menu item should be 'active'.
+      if(this.formActiveStepData){
+        return item.title == this.formActiveStepData.title
+      } else {
       if (this.$route) {
         return item.href === this.$route.path + this.$route.hash
       } else {
         return item.href === window.location.pathname + window.location.hash
       }
+    }
     },
     isChildActive (child) {
       for (let item of child) {
@@ -54,7 +61,7 @@ export const itemMixin = {
     clickEvent (event, mobileItem) {
       this.emitItemClick(event, this.item)
 
-      if (this.item.disabled || (mobileItem && !this.item.href)) {
+      if (this.item.disabled || (mobileItem && !(typeof this.item.href != 'undefined'))) {
         event.preventDefault()
         return
       }
@@ -85,7 +92,7 @@ export const itemMixin = {
           } else {
             this.active ? this.toggleDropdown() : this.itemShow = true
           }
-        } else if (!this.item.href) {
+        } else if (!(typeof this.item.href != 'undefined')) {
           event.preventDefault()
           if (this.firstItem && this.showOneChild && !this.showChild) {
             if (this.activeShow.uid === this._uid) {
@@ -123,8 +130,18 @@ export const itemMixin = {
   },
   watch: {
     $route () {
-      this.active = this.item && this.item.href ? this.isLinkActive(this.item) : false
+      this.active = this.item && typeof this.item.href != 'undefined' ? this.isLinkActive(this.item) : false
       this.childActive = this.item && this.item.child ? this.isChildActive(this.item.child) : false
+    },
+    formActiveStepData: {
+    //This watch function has been added so that the component will be aware of when the current step changes in a multi-step form wizard.
+    //When there is a change it will update the active status of the relevant menu item.
+      handler: function(){
+        this.active = this.item && typeof this.item.href != 'undefined' ? this.isLinkActive(this.item) : false
+        this.childActive = this.item && this.item.child ? this.isChildActive(this.item.child) : false
+      },
+      deep:true,
+      immediate:true 
     }
   },
   inject: ['showChild', 'showOneChild', 'emitActiveShow', 'activeShow', 'emitItemClick', 'rtl']
