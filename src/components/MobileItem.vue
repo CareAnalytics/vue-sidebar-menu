@@ -31,9 +31,10 @@
       </router-link>
     </template>
     <template v-else>
+      <!-- The ':href' has been amended so that the default '#' link is only returned if the 'item.href' is 'undefined' -->
       <a
         class="vsm-link"
-        :href="item.href ? item.href : '#'"
+        :href="typeof item.href != 'undefined' ? item.href : '#'"
         :disabled="item.disabled"
         @click="clickEvent($event, true)"
       >
@@ -67,12 +68,17 @@ export default {
     item: {
       type: Object,
       default: null
+    },
+    //This has been added so that the active form step of a multi-step form can be made available to this component. 
+    formActiveStepData:{
+	    type: Object
     }
   },
   watch: {
     item () {
+      //This line has been amended so that 'item.href' does not need to be defined before the 'active' status is set.
       this.active =
-        this.item && this.item.href ? this.isLinkActive(this.item) : false
+        this.item && typeof this.item.href != 'undefined' ? this.isLinkActive(this.item) : false
       this.childActive =
         this.item && this.item.child
           ? this.isChildActive(this.item.child)
