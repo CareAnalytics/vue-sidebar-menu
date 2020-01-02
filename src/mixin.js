@@ -1,12 +1,12 @@
 export const itemMixin = {
-  data () {
+  data() {
     return {
       active: false,
       childActive: false,
       itemShow: false
     }
   },
-  created () {
+  created() {
     //This line has been amended so that 'item.href' does not need to be defined before the 'active' status is set.
     this.active = this.item && typeof this.item.href != 'undefined' ? this.isLinkActive(this.item) : false
     this.childActive = this.item && this.item.child ? this.isChildActive(this.item.child) : false
@@ -30,22 +30,22 @@ export const itemMixin = {
     }
   },
   methods: {
-    toggleDropdown () {
+    toggleDropdown() {
       this.itemShow = !this.itemShow
     },
-    isLinkActive (item) {
+    isLinkActive(item) {
       //This has been added so that the 'title' of the active step in a multi-step form can be used to determine whether the menu item should be 'active'.
-      if(this.formActiveStepData){
+      if (this.formActiveStepData) {
         return item.title == this.formActiveStepData.title
       } else {
-      if (this.$route) {
-        return item.href === this.$route.path + this.$route.hash
-      } else {
-        return item.href === window.location.pathname + window.location.hash
+        if (this.$route) {
+          return item.href === this.$route.path + this.$route.hash
+        } else {
+          return item.href === window.location.pathname + window.location.hash
+        }
       }
-    }
     },
-    isChildActive (child) {
+    isChildActive(child) {
       for (let item of child) {
         if (this.isLinkActive(item)) {
           return true
@@ -58,7 +58,7 @@ export const itemMixin = {
       }
       return false
     },
-    clickEvent (event, mobileItem) {
+    clickEvent(event, mobileItem) {
       this.emitItemClick(event, this.item)
 
       if (this.item.disabled || (mobileItem && !(typeof this.item.href != 'undefined'))) {
@@ -112,10 +112,10 @@ export const itemMixin = {
     }
   },
   computed: {
-    isRouterLink () {
+    isRouterLink() {
       return this.$router && this.item && this.item.href !== undefined
     },
-    show () {
+    show() {
       if (!this.item || !this.item.child) return false
       if (this.firstItem && this.showOneChild && !this.showChild) {
         if (!this.activeShow.uid) {
@@ -129,19 +129,25 @@ export const itemMixin = {
     }
   },
   watch: {
-    $route () {
+    $route() {
       this.active = this.item && typeof this.item.href != 'undefined' ? this.isLinkActive(this.item) : false
       this.childActive = this.item && this.item.child ? this.isChildActive(this.item.child) : false
     },
     formActiveStepData: {
-    //This watch function has been added so that the component will be aware of when the current step changes in a multi-step form wizard.
-    //When there is a change it will update the active status of the relevant menu item.
-      handler: function(){
+      //This watch function has been added so that the component will be aware of when the current step changes in a multi-step form wizard.
+      //When there is a change it will update the active status of the relevant menu item.
+      handler: function () {
         this.active = this.item && typeof this.item.href != 'undefined' ? this.isLinkActive(this.item) : false
         this.childActive = this.item && this.item.child ? this.isChildActive(this.item.child) : false
+
+        //This is to activate and reveal the sidebar menu group of an active menu section. 
+        if (this.childActive) {
+          this.emitActiveShow(this._uid)
+        }
+
       },
-      deep:true,
-      immediate:true 
+      deep: true,
+      immediate: true
     }
   },
   inject: ['showChild', 'showOneChild', 'emitActiveShow', 'activeShow', 'emitItemClick', 'rtl']
@@ -149,13 +155,13 @@ export const itemMixin = {
 
 export const animationMixin = {
   methods: {
-    expandEnter (el) {
+    expandEnter(el) {
       el.style.height = el.scrollHeight + 'px'
     },
-    expandAfterEnter (el) {
+    expandAfterEnter(el) {
       el.style.height = 'auto'
     },
-    expandBeforeLeave (el) {
+    expandBeforeLeave(el) {
       if (this.isCollapsed) {
         el.style.display = 'none'
         return
